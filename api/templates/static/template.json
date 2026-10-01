@@ -1,0 +1,9 @@
+{
+  "name": "Static site",
+  "description": "Plain HTML/CSS/JS served by nginx. Ideal for sites generated in ChatGPT or Claude.",
+  "layers": ["base"],
+  "tools": ["html5", "nginx", "docker"],
+  "services": ["site"],
+  "tags": ["site"],
+  "order": 4
+}

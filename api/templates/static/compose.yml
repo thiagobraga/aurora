@@ -1,0 +1,17 @@
+services:
+  site:
+    image: nginx:1.31-alpine
+    networks: [default, proxy]
+    volumes:
+      - ./site:/usr/share/nginx/html:ro
+      - ./.docker/site/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.${COMPOSE_PROJECT_NAME:-__ID__}-site.rule=Host(`${APP_SUBDOMAIN:-__SLUG__}.__DOMAIN__`)"
+      - "traefik.http.routers.${COMPOSE_PROJECT_NAME:-__ID__}-site.entrypoints=__ENTRYPOINT__"
+      - "traefik.http.routers.${COMPOSE_PROJECT_NAME:-__ID__}-site.tls=true"
+      - "traefik.http.services.${COMPOSE_PROJECT_NAME:-__ID__}-site.loadbalancer.server.port=80"
+
+networks:
+  proxy:
+    external: true

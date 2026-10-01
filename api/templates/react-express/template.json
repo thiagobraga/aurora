@@ -1,0 +1,9 @@
+{
+  "name": "React + Express API",
+  "description": "Planner-style stack: React 19 + Vite app, Express 5 + TypeScript API, PostgreSQL 17, pgAdmin (debug profile).",
+  "layers": ["base", "app-react", "api-express", "postgres"],
+  "tools": ["react", "vite", "tailwindcss", "typescript", "express", "nodedotjs", "postgresql", "vitest", "docker"],
+  "services": ["app", "api", "postgres", "pgadmin"],
+  "tags": ["web", "api"],
+  "order": 2
+}

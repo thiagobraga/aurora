@@ -1,0 +1,15 @@
+@import "tailwindcss";
+
+@theme {
+  --color-nord0: #2e3440;
+  --color-nord1: #3b4252;
+  --color-nord4: #d8dee9;
+  --color-nord8: #88c0d0;
+  --color-nord14: #a3be8c;
+  --color-nord11: #bf616a;
+  --font-mono: ui-monospace, "JetBrains Mono", "SFMono-Regular", Menlo, monospace;
+}
+
+body {
+  @apply bg-nord0 text-nord4 font-mono antialiased;
+}

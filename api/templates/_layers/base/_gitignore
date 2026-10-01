@@ -1,0 +1,14 @@
+node_modules/
+dist/
+coverage/
+coverage-reports/
+*.tsbuildinfo
+.env
+.env.local
+__pycache__/
+.pytest_cache/
+.venv/
+*.log
+.DS_Store
+test-results/
+playwright-report/

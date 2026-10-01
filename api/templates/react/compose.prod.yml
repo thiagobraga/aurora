@@ -1,0 +1,14 @@
+# Small-VPS profile (e.g. OCI Always Free, 1 GB RAM). A host reverse proxy
+# terminates TLS and forwards to 127.0.0.1:${APP_PORT}.
+services:
+  app:
+    build:
+      context: .
+      dockerfile: .docker/app/Dockerfile
+      target: production
+    ports: ["127.0.0.1:${APP_PORT:-8080}:80"]
+    mem_limit: 64m
+    read_only: true
+    tmpfs: [/var/cache/nginx, /var/run, /tmp]
+    security_opt: [no-new-privileges:true]
+    restart: unless-stopped

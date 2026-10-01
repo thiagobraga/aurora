@@ -1,0 +1,9 @@
+{
+  "name": "React app",
+  "description": "React 19 + Vite + Tailwind 4 + Vitest, dev server and nginx production image.",
+  "layers": ["base", "app-react"],
+  "tools": ["react", "vite", "tailwindcss", "typescript", "vitest", "docker", "nginx"],
+  "services": ["app"],
+  "tags": ["web"],
+  "order": 1
+}

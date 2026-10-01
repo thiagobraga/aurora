@@ -1,0 +1,95 @@
+@import "tailwindcss";
+@import "@fontsource-variable/jetbrains-mono";
+@import "@fontsource-variable/martian-mono";
+
+@theme {
+  /* Nord — https://www.nordtheme.com/docs/colors-and-palettes */
+  --color-nord0: #2e3440;
+  --color-nord1: #3b4252;
+  --color-nord2: #434c5e;
+  --color-nord3: #4c566a;
+  --color-nord4: #d8dee9;
+  --color-nord5: #e5e9f0;
+  --color-nord6: #eceff4;
+  --color-nord7: #8fbcbb;
+  --color-nord8: #88c0d0;
+  --color-nord9: #81a1c1;
+  --color-nord10: #5e81ac;
+  --color-nord11: #bf616a;
+  --color-nord12: #d08770;
+  --color-nord13: #ebcb8b;
+  --color-nord14: #a3be8c;
+  --color-nord15: #b48ead;
+  --color-night: #20242c;
+
+  --font-mono: "JetBrains Mono Variable", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --font-display: "Martian Mono Variable", "JetBrains Mono Variable", ui-monospace, monospace;
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+  body {
+    @apply bg-night text-nord4 font-mono antialiased;
+    font-size: 14px;
+    font-feature-settings: "calt", "zero";
+    background-image:
+      radial-gradient(60rem 40rem at 10% -10%, rgb(94 129 172 / 0.22), transparent 60%),
+      radial-gradient(50rem 35rem at 95% 0%, rgb(180 142 173 / 0.16), transparent 60%),
+      radial-gradient(60rem 40rem at 50% 110%, rgb(143 188 187 / 0.12), transparent 60%);
+    background-attachment: fixed;
+    min-height: 100dvh;
+  }
+  ::selection {
+    background: rgb(136 192 208 / 0.35);
+  }
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-nord3) transparent;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-nord8);
+    outline-offset: 2px;
+  }
+}
+
+/* Frosted panels. Kept as utilities so variants (hover:, md:) work. */
+@utility glass {
+  background: linear-gradient(160deg, rgb(67 76 94 / 0.42), rgb(46 52 64 / 0.38));
+  backdrop-filter: blur(18px) saturate(140%);
+  border: 1px solid rgb(236 239 244 / 0.07);
+  box-shadow:
+    0 1px 0 0 rgb(236 239 244 / 0.05) inset,
+    0 12px 32px -12px rgb(0 0 0 / 0.45);
+}
+
+@utility glass-strong {
+  background: linear-gradient(160deg, rgb(59 66 82 / 0.82), rgb(46 52 64 / 0.86));
+  backdrop-filter: blur(24px) saturate(150%);
+  border: 1px solid rgb(236 239 244 / 0.09);
+  box-shadow: 0 24px 60px -16px rgb(0 0 0 / 0.6);
+}
+
+@utility text-shadow {
+  text-shadow: 0 1px 2px rgb(0 0 0 / 0.65), 0 0 12px rgb(0 0 0 / 0.35);
+}
+
+@utility aurora-text {
+  background: linear-gradient(90deg, var(--color-nord14), var(--color-nord8) 45%, var(--color-nord15));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { box-shadow: 0 0 0 0 currentColor; }
+  50% { box-shadow: 0 0 0 4px transparent; }
+}
+.pulse-dot {
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pulse-dot { animation: none; }
+}

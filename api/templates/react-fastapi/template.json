@@ -1,0 +1,9 @@
+{
+  "name": "React + Python API",
+  "description": "React 19 + Vite app, FastAPI (Python 3.14) API with pytest, PostgreSQL 17, pgAdmin (debug profile).",
+  "layers": ["base", "app-react", "api-fastapi", "postgres"],
+  "tools": ["react", "vite", "tailwindcss", "python", "fastapi", "postgresql", "pytest", "docker"],
+  "services": ["app", "api", "postgres", "pgadmin"],
+  "tags": ["web", "api", "python"],
+  "order": 3
+}

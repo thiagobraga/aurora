@@ -1,0 +1,25 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: .docker/app/Dockerfile
+      target: development
+    networks: [default, proxy]
+    volumes: [./app:/app]
+    user: "${DOCKER_USER:-1000:1000}"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:5173/"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 60s
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.${COMPOSE_PROJECT_NAME:-__ID__}-app.rule=Host(`${APP_SUBDOMAIN:-__SLUG__}.__DOMAIN__`)"
+      - "traefik.http.routers.${COMPOSE_PROJECT_NAME:-__ID__}-app.entrypoints=__ENTRYPOINT__"
+      - "traefik.http.routers.${COMPOSE_PROJECT_NAME:-__ID__}-app.tls=true"
+      - "traefik.http.services.${COMPOSE_PROJECT_NAME:-__ID__}-app.loadbalancer.server.port=5173"
+
+networks:
+  proxy:
+    external: true

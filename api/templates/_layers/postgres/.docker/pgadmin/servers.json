@@ -1,0 +1,14 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "__NAME__",
+      "Group": "Servers",
+      "Host": "postgres",
+      "Port": 5432,
+      "MaintenanceDB": "app",
+      "Username": "app",
+      "SSLMode": "prefer",
+      "Comment": "Dev database. Password in .env (POSTGRES_PASSWORD)"
+    }
+  }
+}

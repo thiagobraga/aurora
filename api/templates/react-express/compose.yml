@@ -1,0 +1,95 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: .docker/app/Dockerfile
+      target: development
+    networks: [default, proxy]
+    volumes: [./app:/app]
+    user: "${DOCKER_USER:-1000:1000}"
+    environment:
+      VITE_API_URL: http://api:4000
+    depends_on: [api]
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:5173/"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 60s
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.${COMPOSE_PROJECT_NAME:-__ID__}-app.rule=Host(`${APP_SUBDOMAIN:-__SLUG__}.__DOMAIN__`)"
+      - "traefik.http.routers.${COMPOSE_PROJECT_NAME:-__ID__}-app.entrypoints=__ENTRYPOINT__"
+      - "traefik.http.routers.${COMPOSE_PROJECT_NAME:-__ID__}-app.tls=true"
+      - "traefik.http.services.${COMPOSE_PROJECT_NAME:-__ID__}-app.loadbalancer.server.port=5173"
+
+  api:
+    build:
+      context: .
+      dockerfile: .docker/api/Dockerfile
+      target: development
+    networks: [default, proxy]
+    volumes: [./api:/app]
+    user: "${DOCKER_USER:-1000:1000}"
+    environment:
+      PORT: 4000
+      DATABASE_URL: postgresql://${POSTGRES_USER:-app}:${POSTGRES_PASSWORD:-app}@postgres:5432/${POSTGRES_DB:-app}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:4000/api/v1/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 60s
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.${COMPOSE_PROJECT_NAME:-__ID__}-api.rule=Host(`${APP_SUBDOMAIN:-__SLUG__}.__DOMAIN__`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.${COMPOSE_PROJECT_NAME:-__ID__}-api.entrypoints=__ENTRYPOINT__"
+      - "traefik.http.routers.${COMPOSE_PROJECT_NAME:-__ID__}-api.tls=true"
+      - "traefik.http.routers.${COMPOSE_PROJECT_NAME:-__ID__}-api.priority=100"
+      - "traefik.http.services.${COMPOSE_PROJECT_NAME:-__ID__}-api.loadbalancer.server.port=4000"
+
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-app}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-app}
+      POSTGRES_DB: ${POSTGRES_DB:-app}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-app}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # Dev-only database UI: docker compose --profile debug up -d pgadmin
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    profiles: [debug]
+    networks: [default, proxy]
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: "False"
+    volumes:
+      - ./.docker/pgadmin/servers.json:/pgadmin4/servers.json:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.${COMPOSE_PROJECT_NAME:-__ID__}-pgadmin.rule=Host(`db.${APP_SUBDOMAIN:-__SLUG__}.__DOMAIN__`)"
+      - "traefik.http.routers.${COMPOSE_PROJECT_NAME:-__ID__}-pgadmin.entrypoints=__ENTRYPOINT__"
+      - "traefik.http.routers.${COMPOSE_PROJECT_NAME:-__ID__}-pgadmin.tls=true"
+      - "traefik.http.services.${COMPOSE_PROJECT_NAME:-__ID__}-pgadmin.loadbalancer.server.port=80"
+
+volumes:
+  pgdata:
+
+networks:
+  proxy:
+    external: true

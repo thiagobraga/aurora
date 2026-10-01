@@ -1,0 +1,74 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: .docker/app/Dockerfile
+      target: development
+    container_name: aurora-app
+    networks: [default, proxy]
+    volumes: [./app:/app]
+    user: "${DOCKER_USER:-1000:1000}"
+    environment:
+      VITE_API_URL: http://api:4000
+    # Loopback only: Aurora drives the Docker daemon, never expose it on the LAN.
+    ports: ["127.0.0.1:${AURORA_PORT:-7700}:5173"]
+    depends_on: [api]
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:5173/"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 60s
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.aurora-app-router.rule=Host(`aurora.${LOCAL_DOMAIN:-local}`)"
+      - "traefik.http.routers.aurora-app-router.entrypoints=${TRAEFIK_ENTRYPOINT:-websecure}"
+      - "traefik.http.routers.aurora-app-router.tls=true"
+      - "traefik.http.services.aurora-app-service.loadbalancer.server.port=5173"
+
+  api:
+    build:
+      context: .
+      dockerfile: .docker/api/Dockerfile
+      target: development
+    container_name: aurora-api
+    networks: [default, proxy]
+    user: "${DOCKER_USER:-1000:1000}"
+    # Group that owns /var/run/docker.sock on the host: `stat -c %g /var/run/docker.sock`
+    group_add: ["${DOCKER_GID:-999}"]
+    volumes:
+      - ./api:/app
+      # Mounted at the SAME absolute path as on the host, so relative bind
+      # mounts inside each project's compose file resolve to real host paths
+      # when Aurora runs `docker compose` against the host daemon.
+      - ${PROJECTS_DIR:?set PROJECTS_DIR in .env}:${PROJECTS_DIR}
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      PORT: 4000
+      PROJECTS_DIR: ${PROJECTS_DIR}
+      AURORA_TOKEN: ${AURORA_TOKEN:-}
+      GITHUB_TOKEN: ${GITHUB_TOKEN:-}
+      LOCAL_DOMAIN: ${LOCAL_DOMAIN:-local}
+      TRAEFIK_ENTRYPOINT: ${TRAEFIK_ENTRYPOINT:-websecure}
+      GIT_USER_NAME: ${GIT_USER_NAME:-Aurora}
+      GIT_USER_EMAIL: ${GIT_USER_EMAIL:-aurora@localhost}
+      HOME: /tmp
+    ulimits:
+      nofile: 65536
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:4000/api/v1/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 60s
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.aurora-api-router.rule=Host(`aurora.${LOCAL_DOMAIN:-local}`) && (PathPrefix(`/api`) || PathPrefix(`/socket.io`))"
+      - "traefik.http.routers.aurora-api-router.entrypoints=${TRAEFIK_ENTRYPOINT:-websecure}"
+      - "traefik.http.routers.aurora-api-router.tls=true"
+      - "traefik.http.routers.aurora-api-router.priority=100"
+      - "traefik.http.services.aurora-api-service.loadbalancer.server.port=4000"
+
+networks:
+  proxy:
+    external: true
