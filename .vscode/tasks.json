@@ -1,0 +1,39 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Docker Run",
+      "type": "shell",
+      "command": "bash .vscode/tasks.sh",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "clear": true,
+        "focus": true,
+        "panel": "shared",
+        "reveal": "always",
+        "showReuseMessage": false
+      }
+    },
+    {
+      "label": "Docker Logs",
+      "type": "shell",
+      "command": "docker compose logs -f",
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "clear": true,
+        "focus": true,
+        "panel": "shared",
+        "reveal": "always",
+        "showReuseMessage": false
+      }
+    }
+  ]
+}
